@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NOVA IA</title>
+
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+<div class="background">
+    <div class="orb orb-one"></div>
+    <div class="orb orb-two"></div>
+    <div class="orb orb-three"></div>
+</div>
+
+<div class="app">
+
+    <aside class="sidebar">
+
+        <div class="logo-area">
+            <div class="logo">N</div>
+
+            <div>
+                <div class="logo-title">NOVA IA</div>
+                <div class="logo-subtitle">INTELLIGENCE</div>
+            </div>
+        </div>
+
+        <button class="new-chat" id="newChat">
+            <span class="new-chat-icon">＋</span>
+            <span>Nouvelle discussion</span>
+            <kbd>Ctrl K</kbd>
+        </button>
+
+        <div class="sidebar-section">
+
+            <div class="section-title">
+                SYSTÈME
+            </div>
+
+            <div class="system-card">
+
+                <div class="online-dot"></div>
+
+                <div class="system-info">
+                    <strong>Serveur NOVA</strong>
+                    <span id="serverStatus">Connexion...</span>
+                </div>
+
+                <span class="live">LIVE</span>
+
+            </div>
+
+        </div>
+
+        <div class="sidebar-section">
+
+            <div class="section-title">
+                MODÈLE
+            </div>
+
+            <div class="model-card">
+
+                <div class="model-symbol">✦</div>
+
+                <div>
+                    <strong>Gemini 2.5 Flash</strong>
+                    <span>Modèle actif</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="sidebar-bottom">
+
+            <div class="version">
+                NOVA IA V2.0
+            </div>
+
+            <button class="clear-button" id="clearChat">
+                <span>Effacer la discussion</span>
+                <span>⌫</span>
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <div class="top-identity">
+
+                <div class="mini-logo">
+                    N
+                </div>
+
+                <div>
+                    <strong>NOVA IA</strong>
+
+                    <div class="online-status">
+                        <span></span>
+                        ONLINE
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="ready">
+                NOVA IA <span>/</span> READY
+            </div>
+
+        </header>
+
+
+        <section class="chat" id="chat">
+
+            <div class="welcome" id="welcome">
+
+                <div class="nova-core">
+
+                    <div class="core-glow"></div>
+
+                    <div class="core">
+                        N
+                    </div>
+
+                </div>
+
+                <div class="welcome-label">
+                    NOVA IA
+                </div>
+
+                <h1>
+                    L'intelligence qui
+                    <span>vous accompagne.</span>
+                </h1>
+
+                <p>
+                    Réfléchissez, créez, codez et explorez
+                    avec une intelligence artificielle rapide
+                    et intuitive.
+                </p>
+
+                <div class="suggestions">
+
+                    <button class="suggestion" data-prompt="Explique-moi quelque chose simplement.">
+                        <div class="suggestion-icon">✦</div>
+
+                        <div>
+                            <strong>Explique-moi quelque chose</strong>
+                            <span>Une explication claire et simple</span>
+                        </div>
+
+                        <div class="suggestion-arrow">→</div>
+                    </button>
+
+
+                    <button class="suggestion" data-prompt="Aide-moi à coder.">
+                        <div class="suggestion-icon code">&lt;/&gt;</div>
+
+                        <div>
+                            <strong>Aide-moi à coder</strong>
+                            <span>Créer, corriger ou améliorer du code</span>
+                        </div>
+
+                        <div class="suggestion-arrow">→</div>
+                    </button>
+
+
+                    <button class="suggestion" data-prompt="Donne-moi une idée de projet intéressante.">
+                        <div class="suggestion-icon">◇</div>
+
+                        <div>
+                            <strong>Donne-moi une idée</strong>
+                            <span>Trouver un projet intéressant</span>
+                        </div>
+
+                        <div class="suggestion-arrow">→</div>
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div id="messages"></div>
+
+        </section>
+
+
+        <div class="composer-area">
+
+            <div class="thinking" id="thinking">
+
+                <div class="thinking-orb"></div>
+
+                <span>NOVA réfléchit...</span>
+
+            </div>
+
+
+            <div class="composer">
+
+                <textarea
+                    id="messageInput"
+                    placeholder="Message à NOVA..."
+                    rows="1"
+                ></textarea>
+
+                <button id="sendButton" class="send-button">
+                    <span>↑</span>
+                </button>
+
+            </div>
+
+            <div class="composer-footer">
+                <span>Gemini 2.5 Flash</span>
+                <span>Entrée pour envoyer</span>
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script src="./script.js"></script>
+
+</body>
+</html>
