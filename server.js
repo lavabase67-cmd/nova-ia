@@ -8,7 +8,7 @@ const app = express();
 
 const PORT = Number(process.env.PORT) || 3000;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = "gemini-3.8-flash";
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
