@@ -1,210 +1,135 @@
-const input = document.getElementById("messageInput");
-const sendButton = document.getElementById("sendButton");
-const messages = document.getElementById("messages");
-const welcome = document.getElementById("welcome");
-const thinking = document.getElementById("thinking");
-const chat = document.getElementById("chat");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-const newChat = document.getElementById("newChat");
-const clearChat = document.getElementById("clearChat");
-const serverStatus = document.getElementById("serverStatus");
+dotenv.config();
 
-let conversation = [];
+const app = express();
 
-function scrollBottom() {
-    requestAnimationFrame(() => {
-        chat.scrollTop = chat.scrollHeight;
+const PORT = Number(process.env.PORT) || 3000;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = "gemini-3.8-flash";
+
+app.use(cors());
+app.use(express.json({ limit: "10mb" }));
+
+app.use(express.static("."));
+
+app.get("/api/status", function (req, res) {
+    res.json({
+        online: true,
+        name: "NOVA IA",
+        model: GEMINI_MODEL
     });
-}
+});
 
-function addMessage(text, type) {
-    const message = document.createElement("div");
-
-    message.className = "message " + type;
-    message.textContent = text;
-
-    messages.appendChild(message);
-
-    scrollBottom();
-}
-
-function setThinking(active) {
-    if (active) {
-        thinking.classList.add("active");
-    } else {
-        thinking.classList.remove("active");
-    }
-
-    scrollBottom();
-}
-
-function resetChat() {
-    conversation = [];
-    messages.innerHTML = "";
-    welcome.style.display = "";
-    input.value = "";
-    input.style.height = "auto";
-    scrollBottom();
-}
-
-async function checkServer() {
+app.post("/api/chat", async function (req, res) {
     try {
-        const response = await fetch("/api/status");
+        const message = req.body && req.body.message;
 
-        if (!response.ok) {
-            throw new Error("Serveur indisponible");
+        if (!message || typeof message !== "string") {
+            return res.status(400).json({
+                error: "Aucun message reçu."
+            });
         }
 
-        serverStatus.textContent = "Serveur connecté";
-    } catch (error) {
-        serverStatus.textContent = "Serveur hors ligne";
-    }
-}
+        if (!GEMINI_API_KEY) {
+            return res.status(500).json({
+                error: "GEMINI_API_KEY est absente du fichier .env."
+            });
+        }
 
-async function sendMessage(customText = null) {
+        console.log("Message reçu :", message);
 
-    const text = customText !== null
-        ? customText.trim()
-        : input.value.trim();
+        const geminiUrl =
+            "https://generativelanguage.googleapis.com/v1beta/models/" +
+            GEMINI_MODEL +
+            ":generateContent";
 
-    if (!text) {
-        return;
-    }
-
-    if (welcome) {
-        welcome.style.display = "none";
-    }
-
-    input.value = "";
-    input.style.height = "auto";
-
-    addMessage(text, "user");
-
-    conversation.push({
-        role: "user",
-        content: text
-    });
-
-    setThinking(true);
-
-    sendButton.disabled = true;
-
-    try {
-
-        const response = await fetch("/api/chat", {
+        const geminiResponse = await fetch(geminiUrl, {
             method: "POST",
-
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "x-goog-api-key": GEMINI_API_KEY
             },
-
             body: JSON.stringify({
-                message: text,
-                messages: conversation
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            {
+                                text: message
+                            }
+                        ]
+                    }
+                ]
             })
         });
 
-        const data = await response.json();
+        const data = await geminiResponse.json();
 
-        if (!response.ok) {
-            throw new Error(
-                data.error ||
-                data.message ||
-                "Erreur du serveur"
-            );
+        if (!geminiResponse.ok) {
+            console.error("Erreur Gemini :", data);
+
+            return res.status(geminiResponse.status).json({
+                error:
+                    data &&
+                    data.error &&
+                    data.error.message
+                        ? data.error.message
+                        : "Erreur Gemini."
+            });
         }
 
-        const reply =
-            data.reply ||
-            data.response ||
-            data.message ||
-            data.answer;
+        const answer =
+            data &&
+            data.candidates &&
+            data.candidates[0] &&
+            data.candidates[0].content &&
+            data.candidates[0].content.parts &&
+            data.candidates[0].content.parts[0] &&
+            data.candidates[0].content.parts[0].text;
 
-        if (!reply) {
-            throw new Error("NOVA n'a pas retourné de réponse.");
+        if (!answer) {
+            console.error("Réponse Gemini inattendue :", data);
+
+            return res.status(500).json({
+                error: "Gemini n'a pas retourné de réponse."
+            });
         }
 
-        conversation.push({
-            role: "assistant",
-            content: reply
+        console.log("Réponse NOVA reçue.");
+
+        return res.json({
+            answer: answer
         });
 
-        setThinking(false);
-
-        addMessage(reply, "ai");
-
     } catch (error) {
+        console.error("Erreur serveur :", error);
 
-        setThinking(false);
-
-        addMessage(
-            "Impossible de contacter NOVA. " + error.message,
-            "ai"
-        );
-
-        console.error("NOVA:", error);
-
-    } finally {
-
-        sendButton.disabled = false;
-
-        input.focus();
-    }
-}
-
-sendButton.addEventListener("click", () => {
-    sendMessage();
-});
-
-input.addEventListener("keydown", (event) => {
-
-    if (event.key === "Enter" && !event.shiftKey) {
-
-        event.preventDefault();
-
-        sendMessage();
+        return res.status(500).json({
+            error: "Erreur interne du serveur.",
+            details: error.message
+        });
     }
 });
 
-input.addEventListener("input", () => {
-
-    input.style.height = "auto";
-
-    input.style.height =
-        Math.min(input.scrollHeight, 150) + "px";
-});
-
-newChat.addEventListener("click", resetChat);
-
-clearChat.addEventListener("click", resetChat);
-
-document.querySelectorAll(".suggestion").forEach((button) => {
-
-    button.addEventListener("click", () => {
-
-        const prompt = button.dataset.prompt;
-
-        if (prompt) {
-            sendMessage(prompt);
-        }
+app.use("/api", function (req, res) {
+    res.status(404).json({
+        error: "Route API introuvable.",
+        route: req.originalUrl
     });
-
 });
 
-document.addEventListener("keydown", (event) => {
-
-    if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "k"
-    ) {
-
-        event.preventDefault();
-
-        resetChat();
-
-        input.focus();
-    }
+app.listen(PORT, function () {
+    console.log("");
+    console.log("================================");
+    console.log(" NOVA IA");
+    console.log("================================");
+    console.log("Site : http://localhost:" + PORT);
+    console.log("API : http://localhost:" + PORT + "/api/chat");
+    console.log("Test : http://localhost:" + PORT + "/api/status");
+    console.log("Modele : " + GEMINI_MODEL);
+    console.log("================================");
+    console.log("");
 });
-
-checkServer();
-input.focus();
